@@ -12,6 +12,16 @@ public enum BotStateEnum {
         this.text = text;
     }
 
+    public static BotStateEnum getByValue(String value) throws IllegalAccessException {
+        for(BotStateEnum state : BotStateEnum.values()) {
+            if(state.getText().equals(value)) {
+                return state;
+            }
+        }
+
+        throw new IllegalAccessException("Enum not exists: " + value);
+    }
+
     public String getText() {
         return text;
     }

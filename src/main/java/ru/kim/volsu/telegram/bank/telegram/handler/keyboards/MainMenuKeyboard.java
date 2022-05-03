@@ -1,4 +1,4 @@
-package ru.kim.volsu.telegram.bank.telegram.keyboards;
+package ru.kim.volsu.telegram.bank.telegram.handler.keyboards;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -25,7 +25,6 @@ public class MainMenuKeyboard {
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
-        sendMessage.setText("Клавиатура: ");
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         return sendMessage;
     }
