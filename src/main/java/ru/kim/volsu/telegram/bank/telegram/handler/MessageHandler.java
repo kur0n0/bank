@@ -1,17 +1,11 @@
 package ru.kim.volsu.telegram.bank.telegram.handler;
 
-import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
 
-@Component
-public class MessageHandler {
+public interface MessageHandler {
+    SendMessage handle(Message message);
 
-    public void processState(BotStateEnum state) {
-        switch (state) {
-            case ACCOUNT_DETAILS:
-                break;
-            case TRANSFER_MONEY:
-                break;
-        }
-    }
+    BotStateEnum getBotState();
 }
