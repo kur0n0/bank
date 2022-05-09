@@ -1,5 +1,7 @@
 package ru.kim.volsu.telegram.bank.telegram;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
@@ -10,9 +12,6 @@ import ru.kim.volsu.telegram.bank.telegram.cache.Cache;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
 import ru.kim.volsu.telegram.bank.telegram.handler.BotStateProcessor;
 import ru.kim.volsu.telegram.bank.utils.StringHelper;
-
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 public class Bot extends SpringWebhookBot {
 
@@ -63,7 +62,6 @@ public class Bot extends SpringWebhookBot {
                 break;
         }
         cache.setBotStateForUser(userId, botStateEnum);
-
         return botStateProcessor.processInputMessage(botStateEnum, message);
     }
 

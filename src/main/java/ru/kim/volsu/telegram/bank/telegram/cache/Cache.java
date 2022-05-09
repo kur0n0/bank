@@ -2,7 +2,6 @@ package ru.kim.volsu.telegram.bank.telegram.cache;
 
 import org.springframework.stereotype.Component;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
-import ru.kim.volsu.telegram.bank.telegram.handler.MessageHandler;
 
 import java.util.HashMap;
 import java.util.Map;
