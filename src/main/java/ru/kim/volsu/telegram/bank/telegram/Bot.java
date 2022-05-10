@@ -36,7 +36,7 @@ public class Bot extends SpringWebhookBot {
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         Message message = update.getMessage();
-        if(StringHelper.isNullOrEmpty(message.getText())) {
+        if (StringHelper.isNullOrEmpty(message.getText())) {
             return null;
         }
 

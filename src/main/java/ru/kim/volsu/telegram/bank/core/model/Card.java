@@ -17,6 +17,9 @@ public class Card {
     @Column
     private String expiredTime;
 
+    @OneToOne (mappedBy = "card")
+    private User user;
+
     public Integer getCardId() {
         return cardId;
     }
@@ -47,5 +50,13 @@ public class Card {
 
     public void setExpiredTime(String expiredTime) {
         this.expiredTime = expiredTime;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

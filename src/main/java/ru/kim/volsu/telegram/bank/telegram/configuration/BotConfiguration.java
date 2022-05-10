@@ -13,16 +13,16 @@ import ru.kim.volsu.telegram.bank.telegram.Bot;
 @Configuration
 public class BotConfiguration {
 
-    @Value("${bot.token}")
+    @Value ("${bot.token}")
     private String botToken;
 
-    @Value("${bot.username}")
+    @Value ("${bot.username}")
     private String botUsername;
 
-    @Value("${webhook.path}")
+    @Value ("${webhook.path}")
     private String webHookPath;
 
-    @Value("${internal.url}")
+    @Value ("${internal.url}")
     private String internalUrl;
 
     @Bean

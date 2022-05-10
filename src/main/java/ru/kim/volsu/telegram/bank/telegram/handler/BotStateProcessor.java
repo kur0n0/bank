@@ -12,7 +12,7 @@ import java.util.Map;
 @Component
 public class BotStateProcessor {
 
-    private Map<BotStateEnum, MessageHandler> messageHandlers = new HashMap<>();
+    private final Map<BotStateEnum, MessageHandler> messageHandlers = new HashMap<>();
 
     public BotStateProcessor(List<MessageHandler> messageHandlerList) {
         messageHandlerList.forEach(
@@ -26,11 +26,11 @@ public class BotStateProcessor {
 
     public MessageHandler findMessageHandler(BotStateEnum botState) {
         if (isTransferMoneyHandler(botState)) {
-            return messageHandlers.get(botState);
+            return messageHandlers.get(BotStateEnum.TRANSFER_MONEY_MENU);
         }
 
         if (isAccountDetailsHandler(botState)) {
-            return messageHandlers.get(botState);
+            return messageHandlers.get(BotStateEnum.ACCOUNT_DETAILS_MENU);
         }
 
         return messageHandlers.get(BotStateEnum.MAIN_MENU);
@@ -49,7 +49,11 @@ public class BotStateProcessor {
     private boolean isTransferMoneyHandler(BotStateEnum botState) {
         switch (botState) {
             case TRANSFER_MONEY_MENU:
-            case TRANSFER_MONEY_ASK_PHONE_NUMBER:
+            case TRANSFER_MONEY_ASK_USERNAME:
+            case TRANSFER_MONEY_REGISTRATE_CARD:
+            case TRANSFER_MONEY_ASK_CARD_NUMBER:
+            case TRANSFER_MONEY_ASK_EXPIRE_DATE:
+            case TRANSFER_MONEY_ASK_CVV:
                 return true;
             default:
                 return false;

@@ -40,4 +40,18 @@ public class UserDaoImpl implements UserDao {
             transaction.rollback();
         }
     }
+
+    @Override
+    public void update(User user) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        try {
+            session.update(user);
+            transaction.commit();
+        } catch (Exception e) {
+            log.error("Ошибка при обновлении данных пользователя в бд: {}, userName: {}",
+                    e.getMessage(), user.getUserName());
+            transaction.rollback();
+        }
+    }
 }
