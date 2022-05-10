@@ -19,8 +19,8 @@ public enum BotStateEnum {
     }
 
     public static BotStateEnum getByValue(String value) throws IllegalAccessException {
-        for(BotStateEnum state : BotStateEnum.values()) {
-            if(state.getText().equals(value)) {
+        for (BotStateEnum state : BotStateEnum.values()) {
+            if (state.getText().equals(value)) {
                 return state;
             }
         }

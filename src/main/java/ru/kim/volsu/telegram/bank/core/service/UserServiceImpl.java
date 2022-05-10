@@ -27,7 +27,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isExist(String chatId) {
-        return !Objects.isNull(userDao.getByChatId(chatId));
+    public User getByChatId(String chatId) {
+        User user = userDao.getByChatId(chatId);
+        return Objects.isNull(user) ? null : user;
     }
 }

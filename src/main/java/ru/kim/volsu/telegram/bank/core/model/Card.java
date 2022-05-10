@@ -5,7 +5,7 @@ import javax.persistence.*;
 @Entity
 public class Card {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Integer cardId;
 
     @Column

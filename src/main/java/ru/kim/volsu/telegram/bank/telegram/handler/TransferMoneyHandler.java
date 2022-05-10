@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.kim.volsu.telegram.bank.core.model.User;
 import ru.kim.volsu.telegram.bank.core.service.UserService;
 import ru.kim.volsu.telegram.bank.telegram.cache.Cache;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
 
+import java.util.Objects;
+
 
 @Component
-public class TransferMoneyHandler implements MessageHandler{
+public class TransferMoneyHandler implements MessageHandler {
 
     @Autowired
     private Cache cache;
@@ -33,10 +36,12 @@ public class TransferMoneyHandler implements MessageHandler{
                 sendMessage.setText("Введите свой номер телефона");
                 sendMessage.setChatId(message.getChatId().toString());
 
-                if(!userService.isExist(message.getChatId().toString())) {
+                User user = userService.getByChatId(message.getChatId().toString());
+                if (Objects.isNull(user)) {
                     userService.createNewUser(message);
                     log.info("Регистрация пользователя с chatId: {} прошла успешно", message.getChatId());
                 }
+
 
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_PHONE_NUMBER);
                 return sendMessage;

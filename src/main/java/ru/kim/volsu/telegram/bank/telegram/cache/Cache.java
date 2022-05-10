@@ -15,7 +15,7 @@ public class Cache {
     }
 
     public void setBotStateForUser(Long userId, BotStateEnum botState) {
-        if(userState.containsKey(userId)) {
+        if (userState.containsKey(userId)) {
             userState.replace(userId, botState);
         } else {
             userState.put(userId, botState);

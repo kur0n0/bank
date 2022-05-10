@@ -3,10 +3,10 @@ package ru.kim.volsu.telegram.bank.core.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table (name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Integer userId;
 
     @Column
@@ -22,7 +22,7 @@ public class User {
     private String chatId;
 
     @OneToOne
-    @JoinColumn(name = "cardId")
+    @JoinColumn (name = "cardId")
     private Card card;
 
     public Integer getUserId() {
