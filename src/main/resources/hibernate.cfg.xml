@@ -12,5 +12,6 @@
         <property name="hibernate.show_sql">true</property>
         <mapping class="ru.kim.volsu.telegram.bank.core.model.User"/>
         <mapping class="ru.kim.volsu.telegram.bank.core.model.Card"/>
+        <mapping class="ru.kim.volsu.telegram.bank.core.model.TransactionHistory"/>
     </session-factory>
 </hibernate-configuration>

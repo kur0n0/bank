@@ -1,6 +1,7 @@
 package ru.kim.volsu.telegram.bank.core.model;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table (name = "users")
@@ -24,6 +25,12 @@ public class User {
     @OneToOne
     @JoinColumn (name = "cardId")
     private Card card;
+
+    @OneToMany (mappedBy = "to")
+    private List<TransactionHistory> incometransactionHistory;
+
+    @OneToMany (mappedBy = "from")
+    private List<TransactionHistory> outcomeTransactionhistory;
 
     public Integer getUserId() {
         return userId;
@@ -71,5 +78,21 @@ public class User {
 
     public void setCard(Card card) {
         this.card = card;
+    }
+
+    public List<TransactionHistory> getIncometransactionHistory() {
+        return incometransactionHistory;
+    }
+
+    public void setIncometransactionHistory(List<TransactionHistory> incometransactionHistory) {
+        this.incometransactionHistory = incometransactionHistory;
+    }
+
+    public List<TransactionHistory> getOutcomeTransactionhistory() {
+        return outcomeTransactionhistory;
+    }
+
+    public void setOutcomeTransactionhistory(List<TransactionHistory> outcomeTransactionhistory) {
+        this.outcomeTransactionhistory = outcomeTransactionhistory;
     }
 }

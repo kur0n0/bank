@@ -1,6 +1,7 @@
 package ru.kim.volsu.telegram.bank.core.model;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 public class Card {
@@ -17,8 +18,8 @@ public class Card {
     @Column
     private String expiredTime;
 
-    @OneToOne (mappedBy = "card")
-    private User user;
+    @Column
+    private BigDecimal actualBalance;
 
     public Integer getCardId() {
         return cardId;
@@ -52,11 +53,11 @@ public class Card {
         this.expiredTime = expiredTime;
     }
 
-    public User getUser() {
-        return user;
+    public BigDecimal getActualBalance() {
+        return actualBalance;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setActualBalance(BigDecimal actualBalance) {
+        this.actualBalance = actualBalance;
     }
 }
