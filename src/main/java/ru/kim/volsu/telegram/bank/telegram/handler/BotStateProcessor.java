@@ -54,6 +54,8 @@ public class BotStateProcessor {
             case TRANSFER_MONEY_ASK_CARD_NUMBER:
             case TRANSFER_MONEY_ASK_EXPIRE_DATE:
             case TRANSFER_MONEY_ASK_CVV:
+            case TRANSFER_MONEY_TRANSACTION:
+            case TRANSFER_MONEY_ASK_AMOUNT:
                 return true;
             default:
                 return false;

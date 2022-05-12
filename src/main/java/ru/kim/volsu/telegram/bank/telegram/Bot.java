@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -38,6 +39,15 @@ public class Bot extends SpringWebhookBot {
         Message message = update.getMessage();
         if (StringHelper.isNullOrEmpty(message.getText())) {
             return null;
+        }
+
+        if (StringHelper.isNullOrEmpty(message.getChat().getUserName())) {
+            log.error("Отсутствует имя польхователя у userId: {}", message.getFrom().getId());
+            return SendMessage.builder()
+                    .chatId(message.getChatId().toString())
+                    .text("Для работы бота требуется имя пользователя." +
+                            "\nПожалуйста перейдите в найстроки и задайте его.")
+                    .build();
         }
 
         log.info("Получено сообщение от {}, текст: {}", message.getChat().getUserName(), message.getText());

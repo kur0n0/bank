@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 import ru.kim.volsu.telegram.bank.core.configuration.HibernateUtil;
 import ru.kim.volsu.telegram.bank.core.model.Card;
 
+import java.math.BigDecimal;
+
 @Repository
 public class CardDaoImpl implements CardDao {
 
@@ -30,6 +32,45 @@ public class CardDaoImpl implements CardDao {
         } catch (Exception e) {
             log.error("Ошибка при добавлении карты в бд: {}", e.getMessage());
             transaction.rollback();
+        }
+    }
+
+    @Override
+    public void update(Card card) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        try {
+            session.update(card);
+            transaction.commit();
+        } catch (Exception e) {
+            log.error("Ошибка при обновлении данных карты: {}, cardId: {}",
+                    e.getMessage(), card.getCardId());
+            transaction.rollback();
+        } finally {
+            session.close();
+        }
+    }
+
+    @Override
+    public void makeTransaction(Card from, Card to, BigDecimal amount) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.getTransaction();
+        try {
+            BigDecimal subtractedAmount = from.getActualBalance().subtract(amount);
+            from.setActualBalance(subtractedAmount);
+
+            BigDecimal addedAmount = to.getActualBalance().add(amount);
+            to.setActualBalance(addedAmount);
+
+            update(from);
+            update(to);
+            transaction.commit();
+        } catch (Exception e) {
+            log.error("Ошибка при выполнении транзакции: {}, с карты {} на карту {}",
+                    e.getMessage(), from.getCardId(), to.getCardId());
+            transaction.rollback();
+        } finally {
+            session.close();
         }
     }
 }

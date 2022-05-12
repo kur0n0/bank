@@ -9,11 +9,14 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.kim.volsu.telegram.bank.core.model.Card;
 import ru.kim.volsu.telegram.bank.core.model.User;
 import ru.kim.volsu.telegram.bank.core.service.RegistrationService;
+import ru.kim.volsu.telegram.bank.core.service.TransactionService;
 import ru.kim.volsu.telegram.bank.core.service.UserService;
 import ru.kim.volsu.telegram.bank.telegram.cache.Cache;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -28,6 +31,9 @@ public class TransferMoneyHandler implements MessageHandler {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TransactionService transactionService;
 
     private static Logger log = LogManager.getLogger(TransferMoneyHandler.class);
 
@@ -53,7 +59,7 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 cache.setBotStateForUser(userId, botState);
                 return SendMessage.builder()
-                        .text("Введите любой символ")
+                        .text("Введите любой символ для продолжения работы")
                         .chatId(chatId)
                         .build();
             }
@@ -168,10 +174,55 @@ public class TransferMoneyHandler implements MessageHandler {
                 return null;
             }
             case TRANSFER_MONEY_ASK_USERNAME: {
-                cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
+                cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_TRANSACTION);
                 return SendMessage.builder()
                         .chatId(chatId)
-                        .text("Введите username")
+                        .text("Введите имя пользователя, которому нужно перевести деньги, например: kur0n0")
+                        .build();
+            }
+            case TRANSFER_MONEY_TRANSACTION: {
+                String username = message.getText();
+
+                User toUser = userService.getByUsername(username);
+                User fromUser = userService.getByChatId(chatId);
+                if (Objects.isNull(toUser)) {
+                    log.error("Отсутсвует пользователь с username: {}", username);
+                    return SendMessage.builder()
+                            .chatId(chatId)
+                            .text("Отсутсвует пользователь с username: " + username + "\nПопробуйте заново")
+                            .build();
+                }
+
+                cache.setTransaction(userId, fromUser.getUserName(), toUser.getUserName());
+                cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_AMOUNT);
+                return SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Введите суммы для перевода средств")
+                        .build();
+            }
+            case TRANSFER_MONEY_ASK_AMOUNT: {
+                String stringAmount = message.getText();
+
+                BigDecimal amount;
+                try {
+                    amount = new BigDecimal(stringAmount);
+                } catch (NumberFormatException e) {
+                    log.error("Введена неправильная сумма: {}", stringAmount);
+                    return SendMessage.builder()
+                            .chatId(chatId)
+                            .text("Введена неправильная сумма, попробуйте снова")
+                            .build();
+                }
+
+                // пара ключ - от кого перевод, значени - кому перевод
+                Map.Entry<String, String> entry = cache.getTransaction(userId);
+                transactionService.transferMoney(entry.getKey(), entry.getValue(), amount);
+                cache.removeTransaction(userId);
+                cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
+                log.info("Перевод пользователю с username: {} прошел успешно", entry.getValue());
+                return SendMessage.builder()
+                        .chatId(chatId)
+                        .text(String.format("Перевод пользователю с username: %s прошел успешно", entry.getValue()))
                         .build();
             }
             default:

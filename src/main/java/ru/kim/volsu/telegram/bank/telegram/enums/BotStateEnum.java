@@ -12,6 +12,8 @@ public enum BotStateEnum {
     TRANSFER_MONEY_ASK_CARD_NUMBER, // Запрос номера карты
     TRANSFER_MONEY_ASK_EXPIRE_DATE, // Запрос даты действия карты
     TRANSFER_MONEY_ASK_CVV, // Запрос cvv кода карты
+    TRANSFER_MONEY_TRANSACTION, // Перевод денег
+    TRANSFER_MONEY_ASK_AMOUNT, // Запрос суммы денег для перевода
 
     // состояние для получения информации о счете
     ACOUNT_DETAILS_INFO // Вывести информацию о счете

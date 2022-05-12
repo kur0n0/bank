@@ -23,6 +23,7 @@ public class UserDaoImpl implements UserDao {
                 .setParameter("chatId", chatId)
                 .setMaxResults(1)
                 .getResultList();
+        session.close();
 
         return resultList.isEmpty() ? null : resultList.get(0);
     }
@@ -38,6 +39,8 @@ public class UserDaoImpl implements UserDao {
             log.error("Ошибка при добавлении пользователя в бд: {}, userName: {}",
                     e.getMessage(), user.getUserName());
             transaction.rollback();
+        } finally {
+            session.close();
         }
     }
 
@@ -52,6 +55,18 @@ public class UserDaoImpl implements UserDao {
             log.error("Ошибка при обновлении данных пользователя в бд: {}, userName: {}",
                     e.getMessage(), user.getUserName());
             transaction.rollback();
+        } finally {
+            session.close();
         }
+    }
+
+    @Override
+    public User getByUsername(String username) {
+        Session session = sessionFactory.openSession();
+        List<User> resultList = session.createQuery("from User u where u.userName = :username")
+                .setParameter("username", username)
+                .setMaxResults(1)
+                .getResultList();
+        return resultList.isEmpty() ? null : resultList.get(0);
     }
 }

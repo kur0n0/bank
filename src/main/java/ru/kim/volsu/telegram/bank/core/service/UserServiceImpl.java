@@ -29,6 +29,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getByUsername(String username) {
+        User user = userDao.getByUsername(username);
+        return Objects.isNull(user) ? null : user;
+    }
+
+    @Override
     public void update(User user) {
         userDao.update(user);
     }

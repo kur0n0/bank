@@ -7,5 +7,7 @@ public interface UserService {
 
     User getByChatId(String chatId);
 
+    User getByUsername(String username);
+
     void update(User user);
 }

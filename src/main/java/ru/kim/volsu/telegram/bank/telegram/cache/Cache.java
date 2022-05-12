@@ -11,6 +11,7 @@ import java.util.Map;
 public class Cache {
     private Map<Long, BotStateEnum> userState = new HashMap<>();
     private Map<Long, Card> userCard = new HashMap<>();
+    private Map<Long, Map.Entry<String, String>> fromUserToUserTransaction = new HashMap<>();
 
     public BotStateEnum getBotStateByUserId(Long userId) {
         return userState.getOrDefault(userId, BotStateEnum.MAIN_MENU);
@@ -38,6 +39,18 @@ public class Cache {
 
     public void removeCardCache(Long userId) {
         userCard.remove(userId);
+    }
+
+    public void setTransaction(Long userId, String from, String to) {
+        fromUserToUserTransaction.put(userId, Map.entry(from, to));
+    }
+
+    public Map.Entry<String, String> getTransaction(Long userId) {
+        return fromUserToUserTransaction.getOrDefault(userId, null);
+    }
+
+    public void removeTransaction(Long userId) {
+        fromUserToUserTransaction.remove(userId);
     }
 
     public void clearCache() {
