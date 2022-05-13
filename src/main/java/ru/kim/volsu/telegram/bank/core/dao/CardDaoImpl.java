@@ -54,7 +54,7 @@ public class CardDaoImpl implements CardDao {
     @Override
     public void makeTransaction(Card from, Card to, BigDecimal amount) {
         Session session = sessionFactory.openSession();
-        Transaction transaction = session.getTransaction();
+        Transaction transaction = session.beginTransaction();
         try {
             BigDecimal subtractedAmount = from.getActualBalance().subtract(amount);
             from.setActualBalance(subtractedAmount);

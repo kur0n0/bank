@@ -26,6 +26,6 @@ as
 
 CREATE TRIGGER process_date
     BEFORE INSERT
-    ON card
+    ON transactionhistory
     FOR EACH ROW
 EXECUTE PROCEDURE set_process_date();

@@ -23,5 +23,5 @@ create table transactionhistory
     fromCardId            int4 references card (cardId),
     toCardId              int4 references card (cardId),
     processDate           timestamp not null,
-    amount                numeric   not null
+    amount                numeric
 );

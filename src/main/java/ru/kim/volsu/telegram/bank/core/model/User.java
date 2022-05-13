@@ -26,10 +26,10 @@ public class User {
     @JoinColumn (name = "cardId")
     private Card card;
 
-    @OneToMany (mappedBy = "to", fetch = FetchType.EAGER)
+    @OneToMany (mappedBy = "to")
     private List<TransactionHistory> incometransactionHistory;
 
-    @OneToMany (mappedBy = "from", fetch = FetchType.EAGER)
+    @OneToMany (mappedBy = "from")
     private List<TransactionHistory> outcomeTransactionhistory;
 
     public Integer getUserId() {

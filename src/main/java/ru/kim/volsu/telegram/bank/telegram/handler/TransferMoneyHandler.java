@@ -20,12 +20,9 @@ import ru.kim.volsu.telegram.bank.telegram.service.SendMessageService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -218,11 +215,25 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 // пара ключ - от кого перевод, значени - кому перевод
                 Map.Entry<String, String> entry = cache.getTransaction(userId);
-                transactionService.transferMoney(entry.getKey(), entry.getValue(), amount);
+                String toUserName = entry.getValue();
+                transactionService.transferMoney(entry.getKey(), toUserName, amount);
                 cache.removeTransaction(userId);
                 cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
-                log.info("Перевод пользователю с username: {} прошел успешно", entry.getValue());
-                return messageBuilder.text(String.format("Перевод пользователю с username: %s прошел успешно", entry.getValue()))
+
+                log.info("Перевод пользователю с username: {} прошел успешно", toUserName);
+
+                User toUser = userService.getByUsername(toUserName);
+                TransactionHistory transactionHistory = transactionService.getLastTransactionToCard(toUser.getCard().getCardId());
+
+                String textMessage = userService.buildTextMessageForTransaction(transactionHistory, toUser.getCard().getCardId());
+                try {
+                    sendMessageService.sendMessage(toUser.getChatId(), textMessage);
+                } catch (TelegramApiException e) {
+                    log.error("Ошибка при отправлении уведомлении о транзакции пользователю: {} " +
+                            "с chatId: {}, username: {}, сообщение: {}", e.getMessage(), toUser.getChatId(), toUser.getUserName(), textMessage);
+                }
+
+                return messageBuilder.text(String.format("Перевод пользователю с username: %s прошел успешно", toUserName))
                         .build();
             }
             case TRANSFER_MONEY_BALANCE: {
@@ -237,23 +248,24 @@ public class TransferMoneyHandler implements MessageHandler {
             }
             case TRANSFER_MONEY_HISTORY: {
                 User user = userService.getByUsername(userName);
-                List<TransactionHistory> transactionList = user.getIncometransactionHistory();
-                transactionList.addAll(user.getOutcomeTransactionhistory());
-                transactionList = transactionList.stream().sorted(
-                        Comparator.comparing(TransactionHistory::getProcessDate, LocalDateTime::compareTo))
-                        .collect(Collectors.toList());
+                Integer currentCardId = user.getCard().getCardId();
+                List<TransactionHistory> transactionList = transactionService.getTransactionsByCardId(currentCardId);
 
                 int size = transactionList.size();
                 TransactionHistory last = transactionList.get(size - 1);
                 transactionList.remove(last);
 
-                Integer currentCardId = user.getCard().getCardId();
+                try {
+                    sendMessageService.sendMessage(chatId, "Ваша история транзакций:");
+                } catch (TelegramApiException e) {
+                    log.error("Ошибка при отправлении сообщения: {} " +
+                            "с chatId: {}, username: {}", e.getMessage(), user.getChatId(), user.getUserName());
+                }
+
                 transactionList.forEach(transaction -> {
                     String textMessage = userService.buildTextMessageForTransaction(transaction, currentCardId);
 
                     try {
-                        sendMessageService.sendMessage(chatId, "Ваша история транзакций:");
-
                         sendMessageService.sendMessage(chatId, textMessage);
                     } catch (TelegramApiException e) {
                         log.error("Ошибка при отправлении сообщения по получении истории транзакций пользователю: {} " +
