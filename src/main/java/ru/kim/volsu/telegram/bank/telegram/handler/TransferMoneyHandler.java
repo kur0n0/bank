@@ -13,6 +13,7 @@ import ru.kim.volsu.telegram.bank.core.service.TransactionService;
 import ru.kim.volsu.telegram.bank.core.service.UserService;
 import ru.kim.volsu.telegram.bank.telegram.cache.Cache;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
+import ru.kim.volsu.telegram.bank.telegram.handler.keyboard.TransferMoneyMenuKeyboard;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,6 +36,9 @@ public class TransferMoneyHandler implements MessageHandler {
     @Autowired
     private TransactionService transactionService;
 
+    @Autowired
+    private TransferMoneyMenuKeyboard keyboard;
+
     private static Logger log = LogManager.getLogger(TransferMoneyHandler.class);
 
     @Override
@@ -43,6 +47,10 @@ public class TransferMoneyHandler implements MessageHandler {
         String chatId = message.getChatId().toString();
         String userName = message.getFrom().getUserName();
         BotStateEnum state = cache.getBotStateByUserId(userId);
+        SendMessage.SendMessageBuilder messageBuilder = SendMessage.builder()
+                .chatId(chatId)
+                .replyMarkup(keyboard.getKeyBoard())
+                .parseMode("Markdown");
         switch (state) {
             case TRANSFER_MONEY_MENU: {
                 User user = userService.getByChatId(chatId);
@@ -58,26 +66,23 @@ public class TransferMoneyHandler implements MessageHandler {
                 }
 
                 cache.setBotStateForUser(userId, botState);
-                return SendMessage.builder()
+                return messageBuilder
                         .text("Введите любой символ для продолжения работы")
-                        .chatId(chatId)
                         .build();
             }
             case TRANSFER_MONEY_REGISTRATE_CARD: {
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setText("Для того чтобы переводить деньги нужно добавить карту.\n" +
-                        "Введите номер карты, например 1234 5678 0000 1111");
-                sendMessage.setChatId(chatId);
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_CARD_NUMBER);
-                return sendMessage;
+                return messageBuilder
+                        .text("Для того чтобы переводить деньги нужно добавить карту.\n" +
+                        "Введите номер карты, например 1234 5678 0000 1111")
+                        .build();
             }
             case TRANSFER_MONEY_ASK_CARD_NUMBER: {
                 String cardNumber = message.getText();
                 String[] numbers = cardNumber.split(" ");
                 if (numbers.length != 4) {
                     log.error("Введен неправильный формат карты: {}, username: {}", cardNumber, userName);
-                    return SendMessage.builder()
-                            .chatId(chatId)
+                    return messageBuilder
                             .text("Введен неправильный формат номера карты, попробуйте заново")
                             .build();
                 }
@@ -87,8 +92,7 @@ public class TransferMoneyHandler implements MessageHandler {
                         Integer.parseInt(v);
                     } catch (NumberFormatException e) {
                         log.error("Введен неправильный формат карты: {}, username: {}", cardNumber, userName);
-                        return SendMessage.builder()
-                                .chatId(chatId)
+                        return messageBuilder
                                 .text("Введен неправильный формат номера карты, попробуйте заново")
                                 .build();
                     }
@@ -99,9 +103,8 @@ public class TransferMoneyHandler implements MessageHandler {
                 cache.setUserCard(userId, card);
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_EXPIRE_DATE);
 
-                return SendMessage.builder()
+                return messageBuilder
                         .text("Введите дату действия карты, например 01/23")
-                        .chatId(chatId)
                         .build();
             }
             case TRANSFER_MONEY_ASK_EXPIRE_DATE: {
@@ -109,8 +112,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 String[] date = expiryDate.split("/");
                 if (date.length != 2) {
                     log.error("Введен неправильный формат даты действия карты: {}, username: {}", expiryDate, userName);
-                    return SendMessage.builder()
-                            .chatId(chatId)
+                    return messageBuilder
                             .text("Введен неправильный формат даты действия карты, попробуйте заново")
                             .build();
                 }
@@ -122,8 +124,7 @@ public class TransferMoneyHandler implements MessageHandler {
                     year = Integer.parseInt(date[1]);
                 } catch (NumberFormatException e) {
                     log.error("Введен неправильный формат даты действия карты: {}, username: {}", expiryDate, userName);
-                    return SendMessage.builder()
-                            .chatId(chatId)
+                    return messageBuilder
                             .text("Введен неправильный формат даты действия карты, попробуйте заново")
                             .build();
                 }
@@ -133,8 +134,7 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 if (month < 1 || month > 12 || currentYear > year) {
                     log.error("Введен неправильный формат даты действия карты: {}, username: {}", expiryDate, userName);
-                    return SendMessage.builder()
-                            .chatId(chatId)
+                    return messageBuilder
                             .text("Введен неправильный формат даты действия карты, попробуйте заново")
                             .build();
                 }
@@ -144,8 +144,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 cache.setUserCard(userId, card);
 
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_CVV);
-                return SendMessage.builder()
-                        .chatId(chatId)
+                return messageBuilder
                         .text("Введите cvv код карты, например 123")
                         .build();
             }
@@ -156,8 +155,7 @@ public class TransferMoneyHandler implements MessageHandler {
                     Integer.parseInt(cvv);
                 } catch (NumberFormatException e) {
                     log.error("Введен неправильный формат cvv кода: {}, username: {}", cvv, userName);
-                    return SendMessage.builder()
-                            .chatId(chatId)
+                    return messageBuilder
                             .text("Введен неправильный формат cvv кода, попробуйте заново")
                             .build();
                 }
@@ -171,12 +169,11 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_USERNAME);
                 cache.removeCardCache(userId);
-                return null;
+                return messageBuilder.build();
             }
             case TRANSFER_MONEY_ASK_USERNAME: {
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_TRANSACTION);
-                return SendMessage.builder()
-                        .chatId(chatId)
+                return messageBuilder
                         .text("Введите имя пользователя, которому нужно перевести деньги, например: kur0n0")
                         .build();
             }
@@ -187,16 +184,14 @@ public class TransferMoneyHandler implements MessageHandler {
                 User fromUser = userService.getByChatId(chatId);
                 if (Objects.isNull(toUser)) {
                     log.error("Отсутсвует пользователь с username: {}", username);
-                    return SendMessage.builder()
-                            .chatId(chatId)
+                    return messageBuilder
                             .text("Отсутсвует пользователь с username: " + username + "\nПопробуйте заново")
                             .build();
                 }
 
                 cache.setTransaction(userId, fromUser.getUserName(), toUser.getUserName());
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_AMOUNT);
-                return SendMessage.builder()
-                        .chatId(chatId)
+                return messageBuilder
                         .text("Введите суммы для перевода средств")
                         .build();
             }
@@ -208,8 +203,7 @@ public class TransferMoneyHandler implements MessageHandler {
                     amount = new BigDecimal(stringAmount);
                 } catch (NumberFormatException e) {
                     log.error("Введена неправильная сумма: {}", stringAmount);
-                    return SendMessage.builder()
-                            .chatId(chatId)
+                    return messageBuilder
                             .text("Введена неправильная сумма, попробуйте снова")
                             .build();
                 }
@@ -220,8 +214,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 cache.removeTransaction(userId);
                 cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
                 log.info("Перевод пользователю с username: {} прошел успешно", entry.getValue());
-                return SendMessage.builder()
-                        .chatId(chatId)
+                return messageBuilder
                         .text(String.format("Перевод пользователю с username: %s прошел успешно", entry.getValue()))
                         .build();
             }
