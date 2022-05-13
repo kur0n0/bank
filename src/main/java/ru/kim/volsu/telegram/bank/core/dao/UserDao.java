@@ -10,4 +10,6 @@ public interface UserDao {
     void update(User user);
 
     User getByUsername(String username);
+
+    User getByCardId(Integer to);
 }

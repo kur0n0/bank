@@ -3,6 +3,7 @@ package ru.kim.volsu.telegram.bank.core.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.kim.volsu.telegram.bank.core.dao.UserDao;
+import ru.kim.volsu.telegram.bank.core.model.TransactionHistory;
 import ru.kim.volsu.telegram.bank.core.model.User;
 
 import java.util.Objects;
@@ -37,6 +38,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public void update(User user) {
         userDao.update(user);
+    }
+
+    @Override
+    public User getByCardId(Integer to) {
+        return userDao.getByCardId(to);
+    }
+
+    @Override
+    public String buildTextMessageForTransaction(TransactionHistory transaction, Integer currentCardId) {
+        User fromUser = getByCardId(transaction.getFrom().getCardId());
+        String amount = transaction.getAmount().toPlainString();
+        String textMessage = String.format("Вам перевел пользователь %s %s рублей",
+                fromUser.getUserName(), amount);
+
+        if (currentCardId.equals(transaction.getFrom().getCardId())) {
+            User toUser = getByCardId(transaction.getTo().getCardId());
+            textMessage = String.format("Вы перевили пользователю %s %s рублей",
+                    toUser.getUserName(), amount);
+        }
+
+        return textMessage;
     }
 
 }

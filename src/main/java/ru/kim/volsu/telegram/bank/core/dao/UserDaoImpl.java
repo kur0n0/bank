@@ -67,6 +67,17 @@ public class UserDaoImpl implements UserDao {
                 .setParameter("username", username)
                 .setMaxResults(1)
                 .getResultList();
+        session.close();
         return resultList.isEmpty() ? null : resultList.get(0);
+    }
+
+    @Override
+    public User getByCardId(Integer to) {
+        Session session = sessionFactory.openSession();
+        User user = session.createQuery("from User u where u.card.cardId = :to", User.class)
+                .setParameter("to", to)
+                .getSingleResult();
+        session.close();
+        return user;
     }
 }
