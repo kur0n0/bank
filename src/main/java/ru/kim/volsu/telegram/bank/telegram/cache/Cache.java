@@ -52,10 +52,6 @@ public class Cache {
         fromUserToUserTransaction.remove(userId);
     }
 
-    public void clearCache() {
-        userState = new HashMap<>();
-    }
-
     public void setTransferMoneyDto(Long userId, TransferMoneyDto transferMoneyDto) {
         transferMoneyDtoMap.put(userId, transferMoneyDto);
     }
