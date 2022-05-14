@@ -198,7 +198,7 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 cache.setTransaction(userId, fromUser.getUserName(), toUser.getUserName());
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_AMOUNT);
-                return messageBuilder.text("Введите суммы для перевода средств")
+                return messageBuilder.text("Введите сумму для перевода средств")
                         .build();
             }
             case TRANSFER_MONEY_ASK_AMOUNT: {
@@ -210,6 +210,12 @@ public class TransferMoneyHandler implements MessageHandler {
                 } catch (NumberFormatException e) {
                     log.error("Введена неправильная сумма: {}", stringAmount);
                     return messageBuilder.text("Введена неправильная сумма, попробуйте снова")
+                            .build();
+                }
+
+                if (amount.compareTo(BigDecimal.ZERO) < 0) {
+                    log.error("Введена отрицательная сумма перевода: {}", amount.toPlainString());
+                    return messageBuilder.text("Введена отрицательная сумма перевода, попробуйте снова")
                             .build();
                 }
 
