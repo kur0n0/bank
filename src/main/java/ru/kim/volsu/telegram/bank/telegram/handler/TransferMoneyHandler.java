@@ -222,6 +222,14 @@ public class TransferMoneyHandler implements MessageHandler {
                 // пара ключ - от кого перевод, значени - кому перевод
                 Map.Entry<String, String> entry = cache.getTransaction(userId);
                 String toUserName = entry.getValue();
+
+                BigDecimal actualBalance = userService.getByUsername(toUserName).getCard().getActualBalance();
+                if(actualBalance.compareTo(amount) < 0) {
+                    log.error("Не хватает средств для перевода");
+                    return messageBuilder.text("На вашем счете не хватает средств для перевода, попробуйте снова")
+                            .build();
+                }
+
                 transactionService.transferMoney(entry.getKey(), toUserName, amount);
                 cache.removeTransaction(userId);
                 cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
