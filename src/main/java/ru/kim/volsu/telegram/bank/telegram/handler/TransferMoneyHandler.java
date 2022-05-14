@@ -175,6 +175,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 User user = userService.getByChatId(chatId);
 
                 registrationService.registrateCard(user, card);
+                log.info("Успешно зарегистрирована карта для пользователя {}", user.getUserName());
 
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_USERNAME);
                 cache.removeCardCache(userId);
@@ -235,7 +236,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 cache.removeTransaction(userId);
                 cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
 
-                log.info("Перевод пользователю с username: {} прошел успешно", toUserName);
+                log.info("Перевод пользователю {} прошел успешно", toUserName);
 
                 User toUser = userService.getByUsername(toUserName);
                 TransactionHistory transactionHistory = transactionService.getLastTransactionToCard(toUser.getCard().getCardId());
@@ -250,7 +251,7 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 try {
                     sendMessageService.sendMessage(chatId,
-                            String.format("Перевод пользователю с username: %s прошел успешно", toUserName));
+                            String.format("Перевод пользователю %s прошел успешно", toUserName));
                 } catch (TelegramApiException e) {
                     log.error("Ошибка при отправлении сообщения о успешности транзакции пользователю {}", toUserName);
                 }
