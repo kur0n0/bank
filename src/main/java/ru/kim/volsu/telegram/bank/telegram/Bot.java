@@ -50,7 +50,7 @@ public class Bot extends SpringWebhookBot {
                     .build();
         }
 
-        log.info("Получено сообщение от {}, текст: {}", message.getChat().getUserName(), message.getText());
+        log.debug("Получено сообщение от {}, текст: {}", message.getChat().getUserName(), message.getText());
         Long userId = message.getFrom().getId();
         BotStateEnum botStateEnum;
         switch (message.getText()) {

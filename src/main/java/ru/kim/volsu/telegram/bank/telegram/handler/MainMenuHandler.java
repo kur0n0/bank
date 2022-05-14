@@ -16,15 +16,12 @@ public class MainMenuHandler implements MessageHandler {
     @Override
     public SendMessage handle(Message message) {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton("Главное меню"));
+        row1.add(new KeyboardButton("Перевод денег"));
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(new KeyboardButton("Перевод денег"));
-        KeyboardRow row3 = new KeyboardRow();
-        row3.add(new KeyboardButton("Данные банковского счета"));
+        row2.add(new KeyboardButton("Данные банковского счета"));
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
         keyboard.add(row2);
-        keyboard.add(row3);
 
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(keyboard);
