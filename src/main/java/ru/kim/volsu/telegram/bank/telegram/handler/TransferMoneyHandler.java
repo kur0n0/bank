@@ -223,7 +223,8 @@ public class TransferMoneyHandler implements MessageHandler {
                 Map.Entry<String, String> entry = cache.getTransaction(userId);
                 String toUserName = entry.getValue();
 
-                BigDecimal actualBalance = userService.getByUsername(entry.getKey()).getCard().getActualBalance();
+                User fromUser = userService.getByUsername(entry.getKey());
+                BigDecimal actualBalance = fromUser.getCard().getActualBalance();
                 if(actualBalance.compareTo(amount) < 0) {
                     log.error("Не хватает средств для перевода");
                     return messageBuilder.text("На вашем счете не хватает средств для перевода, попробуйте снова")
@@ -247,11 +248,17 @@ public class TransferMoneyHandler implements MessageHandler {
                             "с chatId: {}, username: {}, сообщение: {}", e.getMessage(), toUser.getChatId(), toUser.getUserName(), textMessage);
                 }
 
-//                messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s",
-//                        cardNumber, actualBalance.toPlainString()))
-//                        .build()
+                try {
+                    sendMessageService.sendMessage(chatId,
+                            String.format("Перевод пользователю с username: %s прошел успешно", toUserName));
+                } catch (TelegramApiException e) {
+                    log.error("Ошибка при отправлении сообщения о успешности транзакции пользователю {}", toUserName);
+                }
 
-                return messageBuilder.text(String.format("Перевод пользователю с username: %s прошел успешно", toUserName))
+                fromUser = userService.getByUsername(fromUser.getUserName());
+
+                return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s",
+                        fromUser.getCard().getCardNumber(), fromUser.getCard().getActualBalance().toPlainString()))
                         .build();
             }
             case TRANSFER_MONEY_BALANCE: {
