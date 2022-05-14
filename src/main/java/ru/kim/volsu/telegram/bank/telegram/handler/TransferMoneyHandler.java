@@ -55,9 +55,7 @@ public class TransferMoneyHandler implements MessageHandler {
 
         BotStateEnum state = cache.getBotStateByUserId(userId);
         String text = message.getText();
-        if (text.equals("Узнать баланс")) {
-            state = BotStateEnum.TRANSFER_MONEY_BALANCE;
-        } else if (text.equals("Перевод денег")) {
+        if (text.equals("Перевод денег")) {
             state = BotStateEnum.TRANSFER_MONEY_ASK_USERNAME;
         } else if (text.equals("История переводов")) {
             state = BotStateEnum.TRANSFER_MONEY_HISTORY;
@@ -308,16 +306,6 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s",
                         fromUser.getCard().getCardNumber(), fromUser.getCard().getActualBalance().toPlainString()))
-                        .build();
-            }
-            case TRANSFER_MONEY_BALANCE: {
-                Card card = userService.getByUsername(userName).getCard();
-                BigDecimal actualBalance = card.getActualBalance();
-                String cardNumber = card.getCardNumber();
-
-                cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_MENU);
-                return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s",
-                        cardNumber, actualBalance.toPlainString()))
                         .build();
             }
             case TRANSFER_MONEY_HISTORY: {

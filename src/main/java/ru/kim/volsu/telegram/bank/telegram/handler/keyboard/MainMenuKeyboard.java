@@ -8,14 +8,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.List;
 
 @Component
-public class TransferMoneyMenuKeyboard {
+public class MainMenuKeyboard {
     public ReplyKeyboardMarkup getKeyBoard() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton("Главное меню"));
+        row1.add(new KeyboardButton("Перевод денег"));
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(new KeyboardButton("История переводов"));
+        row2.add(new KeyboardButton("Данные банковского счета"));
         KeyboardRow row3 = new KeyboardRow();
-        row3.add(new KeyboardButton("Перевод денег"));
+        row3.add(new KeyboardButton("Узнать баланс"));
         List<KeyboardRow> keyboard = List.of(row1, row2, row3);
 
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();

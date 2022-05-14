@@ -63,6 +63,9 @@ public class Bot extends SpringWebhookBot {
             case "Данные банковского счета":
                 botStateEnum = BotStateEnum.ACCOUNT_DETAILS_MENU;
                 break;
+            case "Узнать баланс":
+                botStateEnum = BotStateEnum.MAIN_MENU_BALANCE;
+                break;
             default:
                 botStateEnum = cache.getBotStateByUserId(userId);
                 break;

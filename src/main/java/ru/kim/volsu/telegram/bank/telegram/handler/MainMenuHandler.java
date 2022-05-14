@@ -1,40 +1,72 @@
 package ru.kim.volsu.telegram.bank.telegram.handler;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import ru.kim.volsu.telegram.bank.core.model.Card;
+import ru.kim.volsu.telegram.bank.core.model.User;
+import ru.kim.volsu.telegram.bank.core.service.UserService;
+import ru.kim.volsu.telegram.bank.telegram.cache.Cache;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
+import ru.kim.volsu.telegram.bank.telegram.handler.keyboard.MainMenuKeyboard;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.Objects;
 
 @Component
 public class MainMenuHandler implements MessageHandler {
+
+    private static final Logger log = LogManager.getLogger(TransferMoneyHandler.class);
+
+    @Autowired
+    private Cache cache;
+
+    @Autowired
+    private MainMenuKeyboard mainMenuKeyboard;
+
+    @Autowired
+    private UserService userService;
+
     @Override
     public SendMessage handle(Message message) {
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton("Перевод денег"));
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(new KeyboardButton("Данные банковского счета"));
-        List<KeyboardRow> keyboard = new ArrayList<>();
-        keyboard.add(row1);
-        keyboard.add(row2);
+        Long userId = message.getFrom().getId();
+        String userName = message.getFrom().getUserName();
+        String chatId = message.getChat().getId().toString();
+        BotStateEnum state = cache.getBotStateByUserId(userId);
 
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setKeyboard(keyboard);
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
+        SendMessage.SendMessageBuilder messageBuilder = SendMessage.builder()
+                .chatId(chatId)
+                .replyMarkup(mainMenuKeyboard.getKeyBoard())
+                .parseMode("Markdown");
 
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.enableMarkdown(true);
-        sendMessage.setText("Выберете действие на клавиатуре");
-        sendMessage.setChatId(message.getChatId().toString());
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-        return sendMessage;
+        switch (state) {
+            case MAIN_MENU_BALANCE: {
+                User user = userService.getByUsername(userName);
+                if (Objects.isNull(user) || Objects.isNull(user.getCard())) {
+                    log.error("Нельзя получить баланс отсутсвует пользователь/карта");
+
+                    cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
+                    return messageBuilder.text("Чтобы получить баланс нужно пройти регистрацию, пожалуйста перейдите в раздел \"Перевод денег\"")
+                            .build();
+                }
+
+                Card card = user.getCard();
+                BigDecimal actualBalance = card.getActualBalance();
+                String cardNumber = card.getCardNumber();
+
+                cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
+                return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s рублей",
+                        cardNumber, actualBalance.toPlainString()))
+                        .build();
+            }
+        }
+
+        cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
+        return messageBuilder.text("Выберете действие на клавиатуре")
+                .build();
     }
 
     @Override

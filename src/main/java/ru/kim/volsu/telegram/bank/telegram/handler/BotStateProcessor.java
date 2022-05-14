@@ -29,21 +29,7 @@ public class BotStateProcessor {
             return messageHandlers.get(BotStateEnum.TRANSFER_MONEY_MENU);
         }
 
-        if (isAccountDetailsHandler(botState)) {
-            return messageHandlers.get(BotStateEnum.ACCOUNT_DETAILS_MENU);
-        }
-
         return messageHandlers.get(BotStateEnum.MAIN_MENU);
-    }
-
-    private boolean isAccountDetailsHandler(BotStateEnum botState) {
-        switch (botState) {
-            case ACCOUNT_DETAILS_MENU:
-            case ACOUNT_DETAILS_INFO:
-                return true;
-            default:
-                return false;
-        }
     }
 
     private boolean isTransferMoneyHandler(BotStateEnum botState) {
@@ -56,7 +42,6 @@ public class BotStateProcessor {
             case TRANSFER_MONEY_ASK_CVV:
             case TRANSFER_MONEY_TRANSACTION:
             case TRANSFER_MONEY_ASK_AMOUNT:
-            case TRANSFER_MONEY_BALANCE:
             case TRANSFER_MONEY_HISTORY:
             case TRANSFER_MONEY_CONFIRMATION:
                 return true;
