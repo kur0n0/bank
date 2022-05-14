@@ -16,6 +16,7 @@ public enum BotStateEnum {
     TRANSFER_MONEY_ASK_AMOUNT, // Запрос суммы денег для перевода
     TRANSFER_MONEY_BALANCE, // Узнать баланс по счету
     TRANSFER_MONEY_HISTORY, // История переводов
+    TRANSFER_MONEY_CONFIRMATION, // Подтверждение платежа
 
     // состояние для получения информации о счете
     ACOUNT_DETAILS_INFO // Вывести информацию о счете

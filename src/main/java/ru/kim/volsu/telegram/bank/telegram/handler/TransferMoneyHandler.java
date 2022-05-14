@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.kim.volsu.telegram.bank.core.model.Card;
 import ru.kim.volsu.telegram.bank.core.model.TransactionHistory;
@@ -14,6 +17,8 @@ import ru.kim.volsu.telegram.bank.core.service.RegistrationService;
 import ru.kim.volsu.telegram.bank.core.service.TransactionService;
 import ru.kim.volsu.telegram.bank.core.service.UserService;
 import ru.kim.volsu.telegram.bank.telegram.cache.Cache;
+import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyDto;
+import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyRequestDto;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
 import ru.kim.volsu.telegram.bank.telegram.handler.keyboard.TransferMoneyMenuKeyboard;
 import ru.kim.volsu.telegram.bank.telegram.service.SendMessageService;
@@ -21,7 +26,6 @@ import ru.kim.volsu.telegram.bank.telegram.service.SendMessageService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 
@@ -68,7 +72,7 @@ public class TransferMoneyHandler implements MessageHandler {
 
         switch (state) {
             case TRANSFER_MONEY_MENU: {
-                cache.removeTransaction(userId);
+                cache.removeFromTo(userId);
                 cache.removeCardCache(userId);
 
                 User user = userService.getByChatId(chatId);
@@ -190,7 +194,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 String username = message.getText();
 
                 User currentUser = userService.getByChatId(chatId);
-                if(currentUser.getUserName().equals(username)) {
+                if (currentUser.getUserName().equals(username)) {
                     log.error("Себе переводить деньги нельзя");
                     return messageBuilder.text("Себе переводить деньги нельзя, введите другое имя пользователся")
                             .build();
@@ -204,7 +208,7 @@ public class TransferMoneyHandler implements MessageHandler {
                             .build();
                 }
 
-                cache.setTransaction(userId, fromUser.getUserName(), toUser.getUserName());
+                cache.setFromTo(userId, new TransferMoneyRequestDto(fromUser.getUserName(), toUser.getUserName()));
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_ASK_AMOUNT);
                 return messageBuilder.text("Введите сумму для перевода средств")
                         .build();
@@ -228,24 +232,60 @@ public class TransferMoneyHandler implements MessageHandler {
                 }
 
                 // пара ключ - от кого перевод, значени - кому перевод
-                Map.Entry<String, String> entry = cache.getTransaction(userId);
-                String toUserName = entry.getValue();
+                TransferMoneyRequestDto request = cache.getFromTo(userId);
+                String toUserName = request.getToUsername();
+                String fromUserName = request.getFromUserName();
 
-                User fromUser = userService.getByUsername(entry.getKey());
+                User fromUser = userService.getByUsername(fromUserName);
                 BigDecimal actualBalance = fromUser.getCard().getActualBalance();
-                if(actualBalance.compareTo(amount) < 0) {
+                if (actualBalance.compareTo(amount) < 0) {
                     log.error("Не хватает средств для перевода");
                     return messageBuilder.text("На вашем счете не хватает средств для перевода, попробуйте снова")
                             .build();
                 }
+                cache.removeFromTo(userId);
 
-                transactionService.transferMoney(entry.getKey(), toUserName, amount);
-                cache.removeTransaction(userId);
+                TransferMoneyDto transferMoneyDto = new TransferMoneyDto(fromUserName, toUserName, amount);
+                cache.setTransferMoneyDto(userId, transferMoneyDto);
+                cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_CONFIRMATION);
+
+                KeyboardRow row1 = new KeyboardRow();
+                row1.add(new KeyboardButton("Да"));
+                KeyboardRow row2 = new KeyboardRow();
+                row2.add(new KeyboardButton("Нет"));
+                List<KeyboardRow> keyboard = List.of(row1, row2);
+
+                ReplyKeyboardMarkup confirmationKeyboard = new ReplyKeyboardMarkup();
+                confirmationKeyboard.setKeyboard(keyboard);
+                confirmationKeyboard.setSelective(true);
+                confirmationKeyboard.setResizeKeyboard(true);
+                confirmationKeyboard.setOneTimeKeyboard(false);
+
+                return SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Выберите да/нет для подтверждения перевода")
+                        .replyMarkup(confirmationKeyboard)
+                        .parseMode("Markdown")
+                        .build();
+            }
+            case TRANSFER_MONEY_CONFIRMATION: {
+                String confirmationText = message.getText();
+                if (!confirmationText.equals("Да")) {
+                    cache.removeTransferMoneyDto(userId);
+                    cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
+
+                    return messageBuilder.build();
+                }
+
+                TransferMoneyDto transferMoneyDto = cache.getTransferMoneyDto(userId);
+                transactionService.transferMoney(transferMoneyDto);
+
                 cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
+                cache.removeTransferMoneyDto(userId);
 
-                log.info("Перевод пользователю {} прошел успешно", toUserName);
+                log.info("Перевод пользователю {} прошел успешно", transferMoneyDto.getToUserName());
 
-                User toUser = userService.getByUsername(toUserName);
+                User toUser = userService.getByUsername(transferMoneyDto.getToUserName());
                 TransactionHistory transactionHistory = transactionService.getLastTransactionToCard(toUser.getCard().getCardId());
 
                 String textMessage = userService.buildTextMessageForTransaction(transactionHistory, toUser.getCard().getCardId());
@@ -258,12 +298,13 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 try {
                     sendMessageService.sendMessage(chatId,
-                            String.format("Перевод пользователю %s прошел успешно", toUserName));
+                            String.format("Перевод пользователю %s прошел успешно", transferMoneyDto.getToUserName()));
                 } catch (TelegramApiException e) {
-                    log.error("Ошибка при отправлении сообщения о успешности транзакции пользователю {}", toUserName);
+                    log.error("Ошибка при отправлении сообщения о успешности транзакции пользователю {}", transferMoneyDto.getToUserName());
                 }
 
-                fromUser = userService.getByUsername(fromUser.getUserName());
+                User fromUser = userService.getByUsername(transferMoneyDto.getFromUserName());
+                cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_MENU);
 
                 return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s",
                         fromUser.getCard().getCardNumber(), fromUser.getCard().getActualBalance().toPlainString()))

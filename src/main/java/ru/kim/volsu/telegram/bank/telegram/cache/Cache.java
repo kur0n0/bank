@@ -2,6 +2,8 @@ package ru.kim.volsu.telegram.bank.telegram.cache;
 
 import org.springframework.stereotype.Component;
 import ru.kim.volsu.telegram.bank.core.model.Card;
+import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyDto;
+import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyRequestDto;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
 
 import java.util.HashMap;
@@ -11,7 +13,8 @@ import java.util.Map;
 public class Cache {
     private Map<Long, BotStateEnum> userState = new HashMap<>();
     private Map<Long, Card> userCard = new HashMap<>();
-    private Map<Long, Map.Entry<String, String>> fromUserToUserTransaction = new HashMap<>();
+    private Map<Long, TransferMoneyRequestDto> fromUserToUserTransaction = new HashMap<>();
+    private Map<Long, TransferMoneyDto> transferMoneyDtoMap = new HashMap<>();
 
     public BotStateEnum getBotStateByUserId(Long userId) {
         return userState.getOrDefault(userId, BotStateEnum.MAIN_MENU);
@@ -26,34 +29,42 @@ public class Cache {
     }
 
     public void setUserCard(Long userId, Card card) {
-        if (userCard.containsKey(userId)) {
-            userCard.replace(userId, card);
-        } else {
-            userCard.put(userId, card);
-        }
+        userCard.put(userId, card);
     }
 
     public Card getCardByUserId(Long userId) {
-        return userCard.getOrDefault(userId, null);
+        return userCard.get(userId);
     }
 
     public void removeCardCache(Long userId) {
         userCard.remove(userId);
     }
 
-    public void setTransaction(Long userId, String from, String to) {
-        fromUserToUserTransaction.put(userId, Map.entry(from, to));
+    public void setFromTo(Long userId, TransferMoneyRequestDto transferMoneyRequestDto) {
+        fromUserToUserTransaction.put(userId, transferMoneyRequestDto);
     }
 
-    public Map.Entry<String, String> getTransaction(Long userId) {
-        return fromUserToUserTransaction.getOrDefault(userId, null);
+    public TransferMoneyRequestDto getFromTo(Long userId) {
+        return fromUserToUserTransaction.get(userId);
     }
 
-    public void removeTransaction(Long userId) {
+    public void removeFromTo(Long userId) {
         fromUserToUserTransaction.remove(userId);
     }
 
     public void clearCache() {
         userState = new HashMap<>();
+    }
+
+    public void setTransferMoneyDto(Long userId, TransferMoneyDto transferMoneyDto) {
+        transferMoneyDtoMap.put(userId, transferMoneyDto);
+    }
+
+    public TransferMoneyDto getTransferMoneyDto(Long userId) {
+        return transferMoneyDtoMap.get(userId);
+    }
+
+    public void removeTransferMoneyDto(Long userId) {
+        transferMoneyDtoMap.remove(userId);
     }
 }

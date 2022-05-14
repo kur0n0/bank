@@ -1,12 +1,12 @@
 package ru.kim.volsu.telegram.bank.core.service;
 
 import ru.kim.volsu.telegram.bank.core.model.TransactionHistory;
+import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyDto;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface TransactionService {
-    void transferMoney(String fromUser, String toUser, BigDecimal amount);
+    void transferMoney(TransferMoneyDto transferMoneyDto);
 
     void saveTransaction(TransactionHistory transactionHistory);
 

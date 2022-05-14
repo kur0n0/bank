@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.kim.volsu.telegram.bank.core.dao.TransactionDao;
 import ru.kim.volsu.telegram.bank.core.model.TransactionHistory;
 import ru.kim.volsu.telegram.bank.core.model.User;
+import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyDto;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -26,15 +26,15 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void transferMoney(String fromUsername, String toUsername, BigDecimal amount) {
-        User fromUser = userService.getByUsername(fromUsername);
-        User toUser = userService.getByUsername(toUsername);
+    public void transferMoney(TransferMoneyDto transferMoneyDto) {
+        User fromUser = userService.getByUsername(transferMoneyDto.getFromUserName());
+        User toUser = userService.getByUsername(transferMoneyDto.getToUserName());
 
         if (fromUser != null && toUser != null) {
-            cardService.makeTransaction(fromUser.getCard(), toUser.getCard(), amount);
+            cardService.makeTransaction(fromUser.getCard(), toUser.getCard(), transferMoneyDto.getAmount());
 
             TransactionHistory transactionHistory = new TransactionHistory();
-            transactionHistory.setAmount(amount);
+            transactionHistory.setAmount(transferMoneyDto.getAmount());
             transactionHistory.setFrom(fromUser.getCard());
             transactionHistory.setTo(toUser.getCard());
             saveTransaction(transactionHistory);

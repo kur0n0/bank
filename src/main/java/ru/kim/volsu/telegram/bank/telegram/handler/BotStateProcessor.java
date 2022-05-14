@@ -58,6 +58,7 @@ public class BotStateProcessor {
             case TRANSFER_MONEY_ASK_AMOUNT:
             case TRANSFER_MONEY_BALANCE:
             case TRANSFER_MONEY_HISTORY:
+            case TRANSFER_MONEY_CONFIRMATION:
                 return true;
             default:
                 return false;
