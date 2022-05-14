@@ -223,7 +223,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 Map.Entry<String, String> entry = cache.getTransaction(userId);
                 String toUserName = entry.getValue();
 
-                BigDecimal actualBalance = userService.getByUsername(toUserName).getCard().getActualBalance();
+                BigDecimal actualBalance = userService.getByUsername(entry.getKey()).getCard().getActualBalance();
                 if(actualBalance.compareTo(amount) < 0) {
                     log.error("Не хватает средств для перевода");
                     return messageBuilder.text("На вашем счете не хватает средств для перевода, попробуйте снова")
@@ -246,6 +246,10 @@ public class TransferMoneyHandler implements MessageHandler {
                     log.error("Ошибка при отправлении уведомлении о транзакции пользователю: {} " +
                             "с chatId: {}, username: {}, сообщение: {}", e.getMessage(), toUser.getChatId(), toUser.getUserName(), textMessage);
                 }
+
+//                messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s",
+//                        cardNumber, actualBalance.toPlainString()))
+//                        .build()
 
                 return messageBuilder.text(String.format("Перевод пользователю с username: %s прошел успешно", toUserName))
                         .build();
