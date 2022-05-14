@@ -189,6 +189,13 @@ public class TransferMoneyHandler implements MessageHandler {
             case TRANSFER_MONEY_TRANSACTION: {
                 String username = message.getText();
 
+                User currentUser = userService.getByChatId(chatId);
+                if(currentUser.getUserName().equals(username)) {
+                    log.error("Себе переводить деньги нельзя");
+                    return messageBuilder.text("Себе переводить деньги нельзя, введите другое имя пользователся")
+                            .build();
+                }
+
                 User toUser = userService.getByUsername(username);
                 User fromUser = userService.getByChatId(chatId);
                 if (Objects.isNull(toUser)) {
