@@ -6,6 +6,7 @@ import ru.kim.volsu.telegram.bank.core.dao.UserDao;
 import ru.kim.volsu.telegram.bank.core.model.TransactionHistory;
 import ru.kim.volsu.telegram.bank.core.model.User;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Service
@@ -49,13 +50,17 @@ public class UserServiceImpl implements UserService {
     public String buildTextMessageForTransaction(TransactionHistory transaction, Integer currentCardId) {
         User fromUser = getByCardId(transaction.getFrom().getCardId());
         String amount = transaction.getAmount().toPlainString();
-        String textMessage = String.format("Входящий перевод от пользоваетля %s +%s рублей",
-                fromUser.getUserName(), amount);
+        String textMessage = String.format("Входящий перевод от пользоваетля %s \n" +
+                        "+%s рублей\n" +
+                        "Дата и время: %s ",
+                fromUser.getUserName(), amount, transaction.getProcessDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
 
         if (currentCardId.equals(transaction.getFrom().getCardId())) {
             User toUser = getByCardId(transaction.getTo().getCardId());
-            textMessage = String.format("Исходящий перевод пользователю %s %s рублей",
-                    toUser.getUserName(), amount);
+            textMessage = String.format("Исходящий перевод пользователю %s \n" +
+                            "%s рублей\n" +
+                            "Дата и время: %s",
+                    toUser.getUserName(), amount, transaction.getProcessDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
         }
 
         return textMessage;
