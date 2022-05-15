@@ -8,7 +8,6 @@ import ru.kim.volsu.telegram.bank.core.model.User;
 import ru.kim.volsu.telegram.bank.utils.StringHelper;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Objects;
 
 @Service
@@ -58,7 +57,7 @@ public class UserServiceImpl implements UserService {
             User toUser = getByCardId(transaction.getTo().getCardId());
 
             String to = toUser.getFirstName() + " " + toUser.getLastName();
-            if(StringHelper.isNullOrEmpty(toUser.getFirstName()) || StringHelper.isNullOrEmpty(toUser.getLastName())) {
+            if (StringHelper.isNullOrEmpty(toUser.getFirstName()) || StringHelper.isNullOrEmpty(toUser.getLastName())) {
                 to = toUser.getUserName();
             }
 
@@ -71,7 +70,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String from = fromUser.getFirstName() + " " + fromUser.getLastName();
-        if(StringHelper.isNullOrEmpty(fromUser.getFirstName()) || StringHelper.isNullOrEmpty(fromUser.getLastName())) {
+        if (StringHelper.isNullOrEmpty(fromUser.getFirstName()) || StringHelper.isNullOrEmpty(fromUser.getLastName())) {
             from = fromUser.getUserName();
         }
 

@@ -43,6 +43,8 @@ public class BotStateProcessor {
             case TRANSFER_MONEY_TRANSACTION:
             case TRANSFER_MONEY_ASK_AMOUNT:
             case TRANSFER_MONEY_CONFIRMATION:
+            case MAIN_MENU_TRANSACTIONS_HISTORY_LAST:
+            case MAIN_MENU_TRANSACTIONS_HISTORY_ALL:
                 return true;
             default:
                 return false;

@@ -2,11 +2,13 @@ package ru.kim.volsu.telegram.bank.telegram.cache;
 
 import org.springframework.stereotype.Component;
 import ru.kim.volsu.telegram.bank.core.model.Card;
+import ru.kim.volsu.telegram.bank.core.model.TransactionHistory;
 import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyDto;
 import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyRequestDto;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -15,6 +17,7 @@ public class Cache {
     private Map<Long, Card> userCard = new HashMap<>();
     private Map<Long, TransferMoneyRequestDto> fromUserToUserTransaction = new HashMap<>();
     private Map<Long, TransferMoneyDto> transferMoneyDtoMap = new HashMap<>();
+    private Map<Long, List<TransactionHistory>> transactionHistoryMap = new HashMap<>();
 
     public BotStateEnum getBotStateByUserId(Long userId) {
         return userState.getOrDefault(userId, BotStateEnum.MAIN_MENU);
@@ -62,5 +65,17 @@ public class Cache {
 
     public void removeTransferMoneyDto(Long userId) {
         transferMoneyDtoMap.remove(userId);
+    }
+
+    public void setTransactionList(Long userId, List<TransactionHistory> transactionList) {
+        transactionHistoryMap.put(userId, transactionList);
+    }
+
+    public List<TransactionHistory> getTransactionList(Long userId) {
+        return transactionHistoryMap.get(userId);
+    }
+
+    public void removeTransactionList(Long userId) {
+        transactionHistoryMap.remove(userId);
     }
 }

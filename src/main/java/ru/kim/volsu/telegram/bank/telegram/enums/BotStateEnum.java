@@ -7,6 +7,8 @@ public enum BotStateEnum {
     ACCOUNT_DETAILS_MENU, // Данные банковского счета
     TRANSFER_MONEY_MENU, // Разделе перевод денег
     MAIN_MENU_TRANSACTIONS_HISTORY, // История переводов
+    MAIN_MENU_TRANSACTIONS_HISTORY_LAST, // Последние 5 переводов
+    MAIN_MENU_TRANSACTIONS_HISTORY_ALL, // Все переводы
 
     // состояние для переводов
     TRANSFER_MONEY_ASK_USERNAME, // Запрос username для перевода средств

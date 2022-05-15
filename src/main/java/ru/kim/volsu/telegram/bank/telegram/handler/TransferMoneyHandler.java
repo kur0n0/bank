@@ -85,7 +85,22 @@ public class TransferMoneyHandler implements MessageHandler {
                 }
 
                 cache.setBotStateForUser(userId, botState);
-                return messageBuilder.text("Выберите действие на клавиатуре")
+
+                KeyboardRow row1 = new KeyboardRow();
+                row1.add(new KeyboardButton("Продолжить"));
+                List<KeyboardRow> keyboard = List.of(row1);
+
+                ReplyKeyboardMarkup continueKeyboard = new ReplyKeyboardMarkup();
+                continueKeyboard.setKeyboard(keyboard);
+                continueKeyboard.setSelective(true);
+                continueKeyboard.setResizeKeyboard(true);
+                continueKeyboard.setOneTimeKeyboard(false);
+
+                return SendMessage.builder()
+                        .chatId(chatId)
+                        .replyMarkup(continueKeyboard)
+                        .parseMode("Markdown")
+                        .text("Нажмите продолжить")
                         .build();
             }
             case TRANSFER_MONEY_REGISTRATE_CARD: {
@@ -294,7 +309,7 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 try {
                     sendMessageService.sendMessage(chatId,
-                            String.format("Перевод пользователю %s прошел успешно", transferMoneyDto.getToUserName()));
+                            String.format(new String(Character.toChars(0x2705)) + "Перевод пользователю %s прошел успешно", transferMoneyDto.getToUserName()));
                 } catch (TelegramApiException e) {
                     log.error("Ошибка при отправлении сообщения о успешности транзакции пользователю {}", transferMoneyDto.getToUserName());
                 }
