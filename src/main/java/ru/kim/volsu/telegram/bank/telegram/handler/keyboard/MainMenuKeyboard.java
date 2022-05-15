@@ -11,12 +11,14 @@ import java.util.List;
 public class MainMenuKeyboard {
     public ReplyKeyboardMarkup getKeyBoard() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton("Перевод денег"));
+        row1.add(new KeyboardButton("Меню перевода денег"));
         KeyboardRow row2 = new KeyboardRow();
         row2.add(new KeyboardButton("Данные банковского счета"));
         KeyboardRow row3 = new KeyboardRow();
         row3.add(new KeyboardButton("Узнать баланс"));
-        List<KeyboardRow> keyboard = List.of(row1, row2, row3);
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add(new KeyboardButton("Получить историю переводов"));
+        List<KeyboardRow> keyboard = List.of(row1, row2, row3, row4);
 
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(keyboard);

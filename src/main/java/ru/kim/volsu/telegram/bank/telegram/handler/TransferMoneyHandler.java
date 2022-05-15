@@ -57,8 +57,6 @@ public class TransferMoneyHandler implements MessageHandler {
         String text = message.getText();
         if (text.equals("Перевод денег")) {
             state = BotStateEnum.TRANSFER_MONEY_ASK_USERNAME;
-        } else if (text.equals("История переводов")) {
-            state = BotStateEnum.TRANSFER_MONEY_HISTORY;
         } else if (text.equals("Меню перевода денег")) {
             state = BotStateEnum.TRANSFER_MONEY_MENU;
         }
@@ -306,37 +304,6 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s",
                         fromUser.getCard().getCardNumber(), fromUser.getCard().getActualBalance().toPlainString()))
-                        .build();
-            }
-            case TRANSFER_MONEY_HISTORY: {
-                User user = userService.getByUsername(userName);
-                Integer currentCardId = user.getCard().getCardId();
-                List<TransactionHistory> transactionList = transactionService.getTransactionsByCardId(currentCardId);
-
-                int size = transactionList.size();
-                TransactionHistory last = transactionList.get(size - 1);
-                transactionList.remove(last);
-
-                try {
-                    sendMessageService.sendMessage(chatId, "Ваша история транзакций:");
-                } catch (TelegramApiException e) {
-                    log.error("Ошибка при отправлении сообщения: {} " +
-                            "с chatId: {}, username: {}", e.getMessage(), user.getChatId(), user.getUserName());
-                }
-
-                transactionList.forEach(transaction -> {
-                    String textMessage = userService.buildTextMessageForTransaction(transaction, currentCardId);
-
-                    try {
-                        sendMessageService.sendMessage(chatId, textMessage);
-                    } catch (TelegramApiException e) {
-                        log.error("Ошибка при отправлении сообщения по получении истории транзакций пользователю: {} " +
-                                "с chatId: {}, username: {}, сообщение: {}", e.getMessage(), user.getChatId(), user.getUserName(), textMessage);
-                    }
-                });
-
-                cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_MENU);
-                return messageBuilder.text(userService.buildTextMessageForTransaction(last, currentCardId))
                         .build();
             }
             default:
