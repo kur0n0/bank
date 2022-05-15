@@ -5,8 +5,10 @@ import org.springframework.stereotype.Service;
 import ru.kim.volsu.telegram.bank.core.dao.UserDao;
 import ru.kim.volsu.telegram.bank.core.model.TransactionHistory;
 import ru.kim.volsu.telegram.bank.core.model.User;
+import ru.kim.volsu.telegram.bank.utils.StringHelper;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Service
@@ -50,18 +52,34 @@ public class UserServiceImpl implements UserService {
     public String buildTextMessageForTransaction(TransactionHistory transaction, Integer currentCardId) {
         User fromUser = getByCardId(transaction.getFrom().getCardId());
         String amount = transaction.getAmount().toPlainString();
-        String textMessage = String.format("Входящий перевод от пользоваетля %s \n" +
-                        "+%s рублей\n" +
-                        "Дата и время: %s ",
-                fromUser.getUserName(), amount, transaction.getProcessDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
+        String textMessage;
 
         if (currentCardId.equals(transaction.getFrom().getCardId())) {
             User toUser = getByCardId(transaction.getTo().getCardId());
-            textMessage = String.format("Исходящий перевод пользователю %s \n" +
+
+            String to = toUser.getFirstName() + " " + toUser.getLastName();
+            if(StringHelper.isNullOrEmpty(toUser.getFirstName()) || StringHelper.isNullOrEmpty(toUser.getLastName())) {
+                to = toUser.getUserName();
+            }
+
+            textMessage = String.format(new String(Character.toChars(0x27A1)) + new String(Character.toChars(0x27A1)) + new String(Character.toChars(0x27A1)) +
+                            "Исходящий перевод пользователю %s \n" +
                             "%s рублей\n" +
                             "Дата и время: %s",
-                    toUser.getUserName(), amount, transaction.getProcessDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
+                    to, amount, transaction.getProcessDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
+            return textMessage;
         }
+
+        String from = fromUser.getFirstName() + " " + fromUser.getLastName();
+        if(StringHelper.isNullOrEmpty(fromUser.getFirstName()) || StringHelper.isNullOrEmpty(fromUser.getLastName())) {
+            from = fromUser.getUserName();
+        }
+
+        textMessage = String.format(new String(Character.toChars(0x2B05)) + new String(Character.toChars(0x2B05)) + new String(Character.toChars(0x2B05)) +
+                        "Входящий перевод от пользоваетля %s \n" +
+                        "+%s рублей\n" +
+                        "Дата и время: %s ",
+                from, amount, transaction.getProcessDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
 
         return textMessage;
     }
