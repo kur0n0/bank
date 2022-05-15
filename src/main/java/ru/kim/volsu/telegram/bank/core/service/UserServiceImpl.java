@@ -49,12 +49,12 @@ public class UserServiceImpl implements UserService {
     public String buildTextMessageForTransaction(TransactionHistory transaction, Integer currentCardId) {
         User fromUser = getByCardId(transaction.getFrom().getCardId());
         String amount = transaction.getAmount().toPlainString();
-        String textMessage = String.format("Вам перевел пользователь %s %s рублей",
+        String textMessage = String.format("Входящий перевод от пользоваетля %s +%s рублей",
                 fromUser.getUserName(), amount);
 
         if (currentCardId.equals(transaction.getFrom().getCardId())) {
             User toUser = getByCardId(transaction.getTo().getCardId());
-            textMessage = String.format("Вы перевили пользователю %s %s рублей",
+            textMessage = String.format("Исходящий перевод пользователю %s %s рублей",
                     toUser.getUserName(), amount);
         }
 
