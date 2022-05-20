@@ -114,7 +114,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 String[] numbers = cardNumber.split(" ");
                 if (numbers.length != 4) {
                     log.error("Введен неправильный формат карты: {}, username: {}", cardNumber, userName);
-                    return messageBuilder.text("Введен неправильный формат номера карты, попробуйте заново")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат номера карты, попробуйте заново")
                             .build();
                 }
 
@@ -123,7 +123,7 @@ public class TransferMoneyHandler implements MessageHandler {
                         Integer.parseInt(v);
                     } catch (NumberFormatException e) {
                         log.error("Введен неправильный формат карты: {}, username: {}", cardNumber, userName);
-                        return messageBuilder.text("Введен неправильный формат номера карты, попробуйте заново")
+                        return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат номера карты, попробуйте заново")
                                 .build();
                     }
                 }
@@ -141,7 +141,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 String[] date = expiryDate.split("/");
                 if (date.length != 2) {
                     log.error("Введен неправильный формат даты действия карты: {}, username: {}", expiryDate, userName);
-                    return messageBuilder.text("Введен неправильный формат даты действия карты, попробуйте заново")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат даты действия карты, попробуйте заново")
                             .build();
                 }
 
@@ -152,7 +152,7 @@ public class TransferMoneyHandler implements MessageHandler {
                     year = Integer.parseInt(date[1]);
                 } catch (NumberFormatException e) {
                     log.error("Введен неправильный формат даты действия карты: {}, username: {}", expiryDate, userName);
-                    return messageBuilder.text("Введен неправильный формат даты действия карты, попробуйте заново")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат даты действия карты, попробуйте заново")
                             .build();
                 }
 
@@ -161,7 +161,7 @@ public class TransferMoneyHandler implements MessageHandler {
 
                 if (month < 1 || month > 12 || currentYear > year) {
                     log.error("Введен неправильный формат даты действия карты: {}, username: {}", expiryDate, userName);
-                    return messageBuilder.text("Введен неправильный формат даты действия карты, попробуйте заново")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат даты действия карты, попробуйте заново")
                             .build();
                 }
 
@@ -179,7 +179,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 try {
                     Integer.parseInt(cvv);
                 } catch (NumberFormatException e) {
-                    log.error("Введен неправильный формат cvv кода: {}, username: {}", cvv, userName);
+                    log.error(new String(Character.toChars(0x274c)) + "Введен неправильный формат cvv кода: {}, username: {}", cvv, userName);
                     return messageBuilder.text("Введен неправильный формат cvv кода, попробуйте заново")
                             .build();
                 }
@@ -207,7 +207,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 User currentUser = userService.getByChatId(chatId);
                 if (currentUser.getUserName().equals(username)) {
                     log.error("Себе переводить деньги нельзя");
-                    return messageBuilder.text("Себе переводить деньги нельзя, введите другое имя пользователся")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Себе переводить деньги нельзя, введите другое имя пользователся")
                             .build();
                 }
 
@@ -215,7 +215,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 User fromUser = userService.getByChatId(chatId);
                 if (Objects.isNull(toUser)) {
                     log.error("Отсутсвует пользователь с username: {}", username);
-                    return messageBuilder.text("Отсутсвует пользователь с username: " + username + "\nПопробуйте заново")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Отсутсвует пользователь с username: " + username + "\nПопробуйте заново")
                             .build();
                 }
 
@@ -231,14 +231,14 @@ public class TransferMoneyHandler implements MessageHandler {
                 try {
                     amount = new BigDecimal(stringAmount);
                 } catch (NumberFormatException e) {
-                    log.error("Введена неправильная сумма: {}", stringAmount);
+                    log.error(new String(Character.toChars(0x274c)) + "Введена неправильная сумма: {}", stringAmount);
                     return messageBuilder.text("Введена неправильная сумма, попробуйте снова")
                             .build();
                 }
 
                 if (amount.compareTo(BigDecimal.ZERO) < 0) {
                     log.error("Введена отрицательная сумма перевода: {}", amount.toPlainString());
-                    return messageBuilder.text("Введена отрицательная сумма перевода, попробуйте снова")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введена отрицательная сумма перевода, попробуйте снова")
                             .build();
                 }
 
@@ -251,7 +251,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 BigDecimal actualBalance = fromUser.getCard().getActualBalance();
                 if (actualBalance.compareTo(amount) < 0) {
                     log.error("Не хватает средств для перевода");
-                    return messageBuilder.text("На вашем счете не хватает средств для перевода, попробуйте снова")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "На вашем счете не хватает средств для перевода, попробуйте снова")
                             .build();
                 }
                 cache.removeFromTo(userId);
@@ -285,7 +285,8 @@ public class TransferMoneyHandler implements MessageHandler {
                     cache.removeTransferMoneyDto(userId);
                     cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
 
-                    return messageBuilder.build();
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Платеж отменен")
+                            .build();
                 }
 
                 TransferMoneyDto transferMoneyDto = cache.getTransferMoneyDto(userId);
