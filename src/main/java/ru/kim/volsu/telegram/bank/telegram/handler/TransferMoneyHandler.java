@@ -317,7 +317,7 @@ public class TransferMoneyHandler implements MessageHandler {
                 User fromUser = userService.getByUsername(transferMoneyDto.getFromUserName());
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_MENU);
 
-                return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s",
+                return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s рублей",
                         fromUser.getCard().getCardNumber(), fromUser.getCard().getActualBalance().toPlainString()))
                         .build();
             }

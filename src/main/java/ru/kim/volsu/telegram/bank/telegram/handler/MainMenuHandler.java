@@ -119,6 +119,7 @@ public class MainMenuHandler implements MessageHandler {
 
                 cache.setTransactionList(userId, transactionList);
                 return SendMessage.builder()
+                        .text("Выберете действие на клавиатуре")
                         .chatId(chatId)
                         .parseMode("Markdown")
                         .replyMarkup(transactionSize)
