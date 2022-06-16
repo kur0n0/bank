@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -46,7 +47,8 @@ public class MainMenuHandler implements MessageHandler {
     private SendMessageService sendMessageService;
 
     @Override
-    public SendMessage handle(Message message) {
+    public SendMessage handle(Update update) {
+        Message message = update.getMessage();
         Long userId = message.getFrom().getId();
         String userName = message.getFrom().getUserName();
         String chatId = message.getChat().getId().toString();
@@ -77,11 +79,13 @@ public class MainMenuHandler implements MessageHandler {
 
                 Card card = user.getCard();
                 BigDecimal actualBalance = card.getActualBalance();
-                String cardNumber = card.getCardNumber();
+                String[] numbers = card.getCardNumber().split(" ");
+                String star = new String(Character.toChars(0x2737));
+                String starsString = String.format(" %s%s%s%s %s%s%s%s ", star, star, star, star, star, star, star, star);
 
                 cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
-                return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s рублей",
-                        cardNumber, actualBalance.toPlainString()))
+                return messageBuilder.text(String.format("Ваш баланс по карте \n%s\n составляет %s рублей",
+                        numbers[0] + starsString + numbers[3], actualBalance.toPlainString()))
                         .build();
             }
             case MAIN_MENU_TRANSACTIONS_HISTORY: {

@@ -37,4 +37,9 @@ public class SendMessageServiceImpl implements SendMessageService {
             sendMessage(chatId, textMessage);
         }
     }
+
+    @Override
+    public void sendMessage(SendMessage message) throws TelegramApiException {
+        bot.execute(message);
+    }
 }

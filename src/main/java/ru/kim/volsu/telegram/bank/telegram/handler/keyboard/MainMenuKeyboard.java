@@ -16,7 +16,9 @@ public class MainMenuKeyboard {
         row2.add(new KeyboardButton("Узнать баланс"));
         KeyboardRow row3 = new KeyboardRow();
         row3.add(new KeyboardButton("Получить историю переводов"));
-        List<KeyboardRow> keyboard = List.of(row1, row2, row3);
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add(new KeyboardButton("Курсы валют"));
+        List<KeyboardRow> keyboard = List.of(row1, row2, row3, row4);
 
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(keyboard);

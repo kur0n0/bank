@@ -1,8 +1,11 @@
 package ru.kim.volsu.telegram.bank.telegram.cache;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.kim.volsu.telegram.bank.core.model.Card;
 import ru.kim.volsu.telegram.bank.core.model.TransactionHistory;
+import ru.kim.volsu.telegram.bank.core.model.Valute;
+import ru.kim.volsu.telegram.bank.core.service.ValuteService;
 import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyDto;
 import ru.kim.volsu.telegram.bank.telegram.dto.TransferMoneyRequestDto;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
@@ -18,6 +21,10 @@ public class Cache {
     private Map<Long, TransferMoneyRequestDto> fromUserToUserTransaction = new HashMap<>();
     private Map<Long, TransferMoneyDto> transferMoneyDtoMap = new HashMap<>();
     private Map<Long, List<TransactionHistory>> transactionHistoryMap = new HashMap<>();
+    private Map<String, Valute> valuteMap = new HashMap<>();
+
+    @Autowired
+    private ValuteService valuteService;
 
     public BotStateEnum getBotStateByUserId(Long userId) {
         return userState.getOrDefault(userId, BotStateEnum.MAIN_MENU);
@@ -77,5 +84,12 @@ public class Cache {
 
     public void removeTransactionList(Long userId) {
         transactionHistoryMap.remove(userId);
+    }
+
+    public Map<String, Valute> getValuteMap() {
+        if (valuteMap == null || valuteMap.size() == 0) {
+            valuteMap = valuteService.parseValute();
+        }
+        return valuteMap;
     }
 }

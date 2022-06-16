@@ -6,6 +6,7 @@ public enum BotStateEnum {
     MAIN_MENU_BALANCE, // Узнать баланс по счету
     TRANSFER_MONEY_MENU, // Разделе перевод денег
 
+    // история
     MAIN_MENU_TRANSACTIONS_HISTORY, // История переводов
     MAIN_MENU_TRANSACTIONS_HISTORY_LAST, // Последние 5 переводов
     MAIN_MENU_TRANSACTIONS_HISTORY_ALL, // Все переводы
@@ -19,4 +20,8 @@ public enum BotStateEnum {
     TRANSFER_MONEY_TRANSACTION, // Перевод денег
     TRANSFER_MONEY_ASK_AMOUNT, // Запрос суммы денег для перевода
     TRANSFER_MONEY_CONFIRMATION, // Подтверждение платежа
+
+    // валюты
+    VALUTE_MENU, // меню с валютами
+    VALUTE_PRINT, // вывод курса валют
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -48,7 +49,8 @@ public class TransferMoneyHandler implements MessageHandler {
     private SendMessageService sendMessageService;
 
     @Override
-    public SendMessage handle(Message message) {
+    public SendMessage handle(Update update) {
+        Message message = update.getMessage();
         Long userId = message.getFrom().getId();
         String chatId = message.getChatId().toString();
         String userName = message.getFrom().getUserName();
@@ -126,6 +128,12 @@ public class TransferMoneyHandler implements MessageHandler {
                         return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат номера карты, попробуйте заново")
                                 .build();
                     }
+
+                    if (v.length() != 4) {
+                        log.error("Введен неправильный формат карты: {}, username: {}", cardNumber, userName);
+                        return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат номера карты, попробуйте заново")
+                                .build();
+                    }
                 }
 
                 Card card = new Card();
@@ -140,6 +148,12 @@ public class TransferMoneyHandler implements MessageHandler {
                 String expiryDate = message.getText();
                 String[] date = expiryDate.split("/");
                 if (date.length != 2) {
+                    log.error("Введен неправильный формат даты действия карты: {}, username: {}", expiryDate, userName);
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат даты действия карты, попробуйте заново")
+                            .build();
+                }
+
+                if(date[0].length() != 2 || date[1].length() != 2) {
                     log.error("Введен неправильный формат даты действия карты: {}, username: {}", expiryDate, userName);
                     return messageBuilder.text(new String(Character.toChars(0x274c)) + "Введен неправильный формат даты действия карты, попробуйте заново")
                             .build();
@@ -179,6 +193,12 @@ public class TransferMoneyHandler implements MessageHandler {
                 try {
                     Integer.parseInt(cvv);
                 } catch (NumberFormatException e) {
+                    log.error(new String(Character.toChars(0x274c)) + "Введен неправильный формат cvv кода: {}, username: {}", cvv, userName);
+                    return messageBuilder.text("Введен неправильный формат cvv кода, попробуйте заново")
+                            .build();
+                }
+
+                if(cvv.length() != 3) {
                     log.error(new String(Character.toChars(0x274c)) + "Введен неправильный формат cvv кода: {}, username: {}", cvv, userName);
                     return messageBuilder.text("Введен неправильный формат cvv кода, попробуйте заново")
                             .build();
@@ -318,8 +338,12 @@ public class TransferMoneyHandler implements MessageHandler {
                 User fromUser = userService.getByUsername(transferMoneyDto.getFromUserName());
                 cache.setBotStateForUser(userId, BotStateEnum.TRANSFER_MONEY_MENU);
 
-                return messageBuilder.text(String.format("Ваш баланс по карте %s составляет %s рублей",
-                        fromUser.getCard().getCardNumber(), fromUser.getCard().getActualBalance().toPlainString()))
+                String[] numbers = fromUser.getCard().getCardNumber().split(" ");
+                String star = new String(Character.toChars(0x2737));
+                String starsString = String.format(" %s%s%s%s %s%s%s%s ", star, star, star, star, star, star, star, star);
+
+                return messageBuilder.text(String.format("Ваш баланс по карте \n%s\n составляет %s рублей",
+                        numbers[0] + starsString + numbers[3], fromUser.getCard().getActualBalance().toPlainString()))
                         .build();
             }
             default:

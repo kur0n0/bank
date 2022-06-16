@@ -2,7 +2,7 @@ package ru.kim.volsu.telegram.bank.telegram.handler;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.kim.volsu.telegram.bank.telegram.enums.BotStateEnum;
 
 import java.util.HashMap;
@@ -20,13 +20,17 @@ public class BotStateProcessor {
         );
     }
 
-    public SendMessage processInputMessage(BotStateEnum botState, Message message) {
-        return findMessageHandler(botState).handle(message);
+    public SendMessage processInputMessage(BotStateEnum botState, Update update) {
+        return findMessageHandler(botState).handle(update);
     }
 
     public MessageHandler findMessageHandler(BotStateEnum botState) {
         if (isTransferMoneyHandler(botState)) {
             return messageHandlers.get(BotStateEnum.TRANSFER_MONEY_MENU);
+        }
+
+        if (isValuteHandler(botState)) {
+            return messageHandlers.get(BotStateEnum.VALUTE_MENU);
         }
 
         return messageHandlers.get(BotStateEnum.MAIN_MENU);
@@ -45,6 +49,16 @@ public class BotStateProcessor {
             case TRANSFER_MONEY_CONFIRMATION:
             case MAIN_MENU_TRANSACTIONS_HISTORY_LAST:
             case MAIN_MENU_TRANSACTIONS_HISTORY_ALL:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isValuteHandler(BotStateEnum botState) {
+        switch (botState) {
+            case VALUTE_MENU:
+            case VALUTE_PRINT:
                 return true;
             default:
                 return false;

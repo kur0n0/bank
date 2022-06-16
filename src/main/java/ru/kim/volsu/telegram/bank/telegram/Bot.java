@@ -16,7 +16,7 @@ import ru.kim.volsu.telegram.bank.utils.StringHelper;
 
 public class Bot extends SpringWebhookBot {
 
-    private static Logger log = LogManager.getLogger(Bot.class);
+    private static final Logger log = LogManager.getLogger(Bot.class);
     private final String webHookPath;
     private final String botName;
     private final String botToken;
@@ -37,8 +37,8 @@ public class Bot extends SpringWebhookBot {
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         Message message = update.getMessage();
-        if (StringHelper.isNullOrEmpty(message.getText())) {
-            return null;
+        if (update.hasCallbackQuery()) {
+            message = update.getCallbackQuery().getMessage();
         }
 
         if (StringHelper.isNullOrEmpty(message.getChat().getUserName())) {
@@ -66,12 +66,20 @@ public class Bot extends SpringWebhookBot {
             case "Получить историю переводов":
                 botStateEnum = BotStateEnum.MAIN_MENU_TRANSACTIONS_HISTORY;
                 break;
+            case "Курсы валют":
+                botStateEnum = BotStateEnum.VALUTE_MENU;
+                break;
             default:
                 botStateEnum = cache.getBotStateByUserId(userId);
                 break;
         }
+
+        if (update.hasCallbackQuery()) {
+            botStateEnum = BotStateEnum.VALUTE_MENU;
+        }
+
         cache.setBotStateForUser(userId, botStateEnum);
-        return botStateProcessor.processInputMessage(botStateEnum, message);
+        return botStateProcessor.processInputMessage(botStateEnum, update);
     }
 
     @Override
