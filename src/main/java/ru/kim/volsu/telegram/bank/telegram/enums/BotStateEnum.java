@@ -1,10 +1,10 @@
 package ru.kim.volsu.telegram.bank.telegram.enums;
 
 public enum BotStateEnum {
-    // основные состояни бота
+    // основные состояние
     MAIN_MENU, // Главное меню
     MAIN_MENU_BALANCE, // Узнать баланс по счету
-    TRANSFER_MONEY_MENU, // Разделе перевод денег
+    TRANSFER_MONEY_MENU, // Раздел перевод денег
 
     // история
     MAIN_MENU_TRANSACTIONS_HISTORY, // История переводов

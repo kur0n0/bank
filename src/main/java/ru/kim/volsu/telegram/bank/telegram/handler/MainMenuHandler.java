@@ -73,7 +73,8 @@ public class MainMenuHandler implements MessageHandler {
                     log.error("Нельзя получить баланс отсутсвует пользователь/карта");
 
                     cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
-                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Чтобы получить баланс нужно пройти регистрацию, пожалуйста перейдите в раздел \"Перевод денег\"")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Чтобы получить баланс нужно пройти регистрацию," +
+                            " пожалуйста перейдите в раздел \"Перевод денег\"")
                             .build();
                 }
 
@@ -94,7 +95,8 @@ public class MainMenuHandler implements MessageHandler {
                     log.error("Нельзя получить историю переводов отсутсвует пользователь/карта");
 
                     cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
-                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Чтобы получить историю переводов нужно пройти регистрацию, пожалуйста перейдите в раздел \"Перевод денег\"")
+                    return messageBuilder.text(new String(Character.toChars(0x274c)) + "Чтобы получить историю переводов нужно пройти регистрацию, " +
+                            "пожалуйста перейдите в раздел \"Перевод денег\"")
                             .build();
                 }
 
@@ -105,7 +107,7 @@ public class MainMenuHandler implements MessageHandler {
                 if (size == 0) {
                     log.warn("Еще нет транзакций");
                     cache.setBotStateForUser(userId, BotStateEnum.MAIN_MENU);
-                    return messageBuilder.text("У вас еще нет тразакций")
+                    return messageBuilder.text("У вас еще нет транзакций")
                             .build();
                 }
 
